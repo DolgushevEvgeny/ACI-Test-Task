@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Reader {
-    public static int maxPriority = 1; 
+    public static int maxPriority = 1;
+    public static PrevToken prevToken = null;
+    private static ArrayList<Token> tokens = null;
     
     enum PrevToken {
         Token,
@@ -28,7 +30,7 @@ public class Reader {
         
         FileReader fr;
         try {
-            fr = new FileReader("C:\\test.txt");
+            fr = new FileReader("C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\test.txt");
         } catch (FileNotFoundException ex) {
             System.out.println("Can't load test file.");
             return;
@@ -51,9 +53,9 @@ public class Reader {
             
             char[] array = parsedExpression[0].toCharArray();
             String current = "";
-            PrevToken prevToken = PrevToken.None;
+            prevToken = PrevToken.None;
             
-            ArrayList<Token> tokens = new ArrayList<>();
+            tokens = new ArrayList<>();
             
             for (int j = 0; j < array.length; ++j) {
                 if (array[j] == ' ') {
@@ -65,15 +67,20 @@ public class Reader {
                             prevToken = PrevToken.Token;
                         } else {
                             if (array[j] == '-' && (prevToken == PrevToken.None || prevToken == PrevToken.Sign)) {
-                                current += array[j];
+                                tokens = addSignToken(array[j]);
+                                prevToken = PrevToken.Token;
                             } else {
                                 try {
                                     tokens.add(new Token(NumberFactory.parse(current), 1));
                                     current = "";
-                                    tokens = addSignToken(array[j], tokens);
+                                    tokens = addSignToken(array[j]);
                                     prevToken = PrevToken.Sign;
                                 } catch (NumberFormatException ex) {
                                     System.out.println(ex + current + " Unknown number format in " + parsedExpression[0]);
+                                    isError = true;
+                                    break;
+                                } catch (StringIndexOutOfBoundsException ex) {
+                                    System.out.println(ex + "in " + parsedExpression[0]);
                                     isError = true;
                                     break;
                                 }
@@ -84,14 +91,18 @@ public class Reader {
                                 try {
                                     tokens.add(new Token(NumberFactory.parse(current), 1));
                                     current = "";
-                                    tokens = addSignToken(array[j], tokens);
+                                    tokens = addSignToken(array[j]);
                                     prevToken = PrevToken.Sign;
                                 } catch (NumberFormatException ex) {
                                     System.out.println(ex + current + " Unknown number format in " + parsedExpression[0]);
                                     isError = true;
                                     break;
+                                } catch (StringIndexOutOfBoundsException ex) {
+                                    System.out.println(ex + "in " + parsedExpression[0]);
+                                    isError = true;
+                                    break;
                                 }
-                        } else tokens = addSignToken(array[j], tokens);
+                        } else tokens = addSignToken(array[j]);
                     }
                 }
             }
@@ -100,10 +111,8 @@ public class Reader {
                 try {
                     tokens.add(new Token(NumberFactory.parse(current), 1));
                     try {
-                        double equationResult = calc(tokens);
-                        System.out.print(value);
-                        System.out.print(" - " + (answer == equationResult));
-                        System.out.println(" " + equationResult);
+                        double equationResult = calc();
+                        System.out.println(value + " - " + (answer == equationResult) + " " + equationResult);
                     } catch (NumberFormatException ex) {
                         System.out.println(ex.toString());
                     }
@@ -117,22 +126,27 @@ public class Reader {
         textReader.close();
     }
     
-    static ArrayList<Token> addSignToken(char sign, ArrayList<Token> tokens) {
+    static ArrayList<Token> addSignToken(char sign) {
         switch (sign) {
             case '+' :
                 maxPriority = maxPriority > 2 ? maxPriority : 2;
                 tokens.add(new Token(1, 2));
                 break;
             case '-' :
+                if (prevToken == PrevToken.None || prevToken == PrevToken.Sign) {
+                    maxPriority = 4;
+                    tokens.add(new Token(5, 4));
+                    break;
+                }
                 maxPriority = maxPriority > 2 ? maxPriority : 2;
                 tokens.add(new Token(2, 2));
                 break;
             case '*' :
-                maxPriority = 3;
+                maxPriority = maxPriority > 3 ? maxPriority : 3;
                 tokens.add(new Token(3, 3));
                 break;
             case '/' :
-                maxPriority = 3;
+                maxPriority = maxPriority > 3 ? maxPriority : 3;
                 tokens.add(new Token(4, 3));
                 break;
         }
@@ -149,21 +163,15 @@ public class Reader {
         }
     }
     
-    static private double calc(ArrayList<Token> tokens) {
-        double total = 0;
+    static private double calc() {
         while (tokens.size() != 1) {
             for (int i = 0; i < tokens.size(); ++i) {
                 if (tokens.get(i).getPriority() == maxPriority) {
-                    double first = tokens.get(i-1).getValue();
-                    double second = tokens.remove(i+1).getValue();
-                    double sign = tokens.remove(i).getValue();
-                    try {
-                        total = doOperation(sign, first, second);
-                    } catch (NumberFormatException ex) {
-                        throw new NumberFormatException("Division By Zero");
+                    switch(maxPriority) {
+                        case 2: PlusMinusOperation(i); break;
+                        case 3: MultDivisionOperation(i); break;
+                        case 4: UnaryMinus(i); break;
                     }
-                    
-                    tokens.set(i-1, new Token(total, 1));
                     --i;
                 }
             }
@@ -171,29 +179,42 @@ public class Reader {
         }
         
         maxPriority = 1;
-        return total;
+        return tokens.get(0).getValue();
     }
     
-    static private double doOperation(double sign, double first, double second) {
-        double total = 0;
-        switch ((int)sign) {
+    static private void PlusMinusOperation(int index) {
+        double first = tokens.get(index-1).getValue();
+        double second = tokens.remove(index+1).getValue();
+        double sign = tokens.remove(index).getValue();
+        switch((int)sign) {
             case 1:
-                total = first + second;
+                tokens.set(index-1, new Token(first + second, 1));
                 break;
             case 2:
-                total = first - second;
+                tokens.set(index-1, new Token(first - second, 1));
                 break;
+        }
+    }
+    
+    static private void MultDivisionOperation(int index) {
+        double first = tokens.get(index-1).getValue();
+        double second = tokens.remove(index+1).getValue();
+        double sign = tokens.remove(index).getValue();
+        switch((int)sign) {
             case 3:
-                total = first * second;
+                tokens.set(index-1, new Token(first * second, 1));
                 break;
             case 4:
                 if (second == 0) {
                     throw new NumberFormatException("Division By Zero");
                 }
-                total = first / second;
+                tokens.set(index-1, new Token(first / second, 1));
                 break;
         }
-        
-        return total;
+    }
+    
+    static private void UnaryMinus(int index) {
+        double first = tokens.remove(index+1).getValue();
+        tokens.set(index, new Token(first*-1, 1));
     }
 }

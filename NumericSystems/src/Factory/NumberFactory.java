@@ -42,6 +42,9 @@ public class NumberFactory {
     }
     
     static public double parse(String number) {
+        if (number.length() == 0) {
+            throw new StringIndexOutOfBoundsException("Empty argument ");
+        }
         for (int i = 0; i < vocabularyList.size(); ++i) {
             if (parseString(vocabularyList.get(i), number)) {
                 switch (i) {
