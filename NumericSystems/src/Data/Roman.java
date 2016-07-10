@@ -2,10 +2,8 @@ package Data;
 
 import Factory.VocabularyToken;
 import java.util.ArrayList;
-//import java.util.Arrays;
 
 public class Roman {
-    //static ArrayList<String> romanSymbols = new ArrayList<>(Arrays.asList("I", "V", "X", "L", "C", "D", "M", "-"));
 
     static public Object[] convert(String value) {
         double answer = 0;
@@ -58,7 +56,6 @@ public class Roman {
         boolean isError = true;
         for (int i = 0; i < value.length(); ++i) {
             for (int j = 0; j < vocabulary.size(); ++j) {
-                //!romanSymbols.contains(value.substring(i, i+1))
                 if (vocabulary.get(j).getKey().equals(value.substring(i, i+1))) {
                     isError = false;
                     break;
@@ -66,7 +63,6 @@ public class Roman {
             }
             
             if (!isError) {
-                //String nextSymbol = value.substring(i, i+1);
                 if (currentSymbol.equals(value.substring(i, i+1))) {
                     ++sameSymbol;
                     if (sameSymbol > 3) {
