@@ -19,7 +19,7 @@ public class NumberFactory {
     }
     
     private void loadVocabulary() throws FileNotFoundException {
-        FileReader fr = new FileReader("C:\\vocabulary.txt");
+        FileReader fr = new FileReader("C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\vocabulary.txt");
         BufferedReader textReader = new BufferedReader(fr);
         
         String alphabet;
