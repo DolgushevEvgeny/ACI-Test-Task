@@ -1,6 +1,7 @@
 package Factory;
 
 import Data.Arabic;
+import Data.Hebrem;
 import Data.Roman;
 import java.util.ArrayList;
 import java.io.FileReader;
@@ -61,6 +62,12 @@ public class NumberFactory {
                             throw new NumberFormatException("Can't convert Arabic number " + number);
                         }
                         return (double)answer[1];
+                    case 2:
+                        try {
+                            return Hebrem.convert(number);
+                        } catch (NumberFormatException ex) {
+                            throw new NumberFormatException(ex.toString());
+                        }
                 }
             }
         }
