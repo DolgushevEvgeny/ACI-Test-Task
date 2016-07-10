@@ -29,8 +29,8 @@ public class NumberFactory {
                 ArrayList<VocabularyToken> vocabulary = new ArrayList<>();
                 
                 for (int i = 0; i < parse.length; ++i) {
-                    String[] element = parse[i].split(":");
-                    VocabularyToken token = new VocabularyToken(element[0], Integer.parseInt(element[1]));
+                    //String[] element = parse[i].split(":");
+                    VocabularyToken token = new VocabularyToken(parse[i]);
                     vocabulary.add(token);
                 }
                 
