@@ -61,9 +61,7 @@ public class Reader {
             tokens = new ArrayList<>();
             
             for (int j = 0; j < array.length; ++j) {
-                if (array[j] == ' ') {
-                    continue;
-                } else {
+                if (array[j] != ' ') {
                     if (array[j] != '+' && array[j] != '*' && array[j] != '/') {
                         if (array[j] != '-') {
                             current += array[j];
