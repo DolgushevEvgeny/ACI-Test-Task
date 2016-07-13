@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Reader {
-    public static int maxPriority = 1;
-    public static PrevToken prevToken = null;
+    private static int maxPriority = 1;
+    private static PrevToken prevToken = null;
     private static ArrayList<Token> tokens = null;
+    private static final String TESTFILE_PATH = "C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\test.txt";
+    private static final String ERROR_DIVISION_BY_ZERO = "Division By Zero";
+    private static final String ERROR_UNKNOWN_NUMBER_FORMAT = " Unknown number format in ";
     
     enum PrevToken {
         Token,
@@ -30,7 +33,7 @@ public class Reader {
         
         FileReader fr;
         try {
-            fr = new FileReader("C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\test.txt");
+            fr = new FileReader(TESTFILE_PATH);
         } catch (FileNotFoundException ex) {
             System.out.println("Can't load test file.");
             return;
@@ -76,7 +79,7 @@ public class Reader {
                                     tokens = addSignToken(array[j]);
                                     prevToken = PrevToken.Sign;
                                 } catch (NumberFormatException ex) {
-                                    System.out.println(ex + current + " Unknown number format in " + parsedExpression[0]);
+                                    System.out.println(ex + current + ERROR_UNKNOWN_NUMBER_FORMAT + parsedExpression[0]);
                                     isError = true;
                                     break;
                                 } catch (StringIndexOutOfBoundsException ex) {
@@ -88,20 +91,20 @@ public class Reader {
                         }
                     } else {
                         if (!current.equals("")) {
-                                try {
-                                    tokens.add(new Token(NumberFactory.parse(current), 1));
-                                    current = "";
-                                    tokens = addSignToken(array[j]);
-                                    prevToken = PrevToken.Sign;
-                                } catch (NumberFormatException ex) {
-                                    System.out.println(ex + current + " Unknown number format in " + parsedExpression[0]);
-                                    isError = true;
-                                    break;
-                                } catch (StringIndexOutOfBoundsException ex) {
-                                    System.out.println(ex + "in " + parsedExpression[0]);
-                                    isError = true;
-                                    break;
-                                }
+                            try {
+                                tokens.add(new Token(NumberFactory.parse(current), 1));
+                                current = "";
+                                tokens = addSignToken(array[j]);
+                                prevToken = PrevToken.Sign;
+                            } catch (NumberFormatException ex) {
+                                System.out.println(ex + current + ERROR_UNKNOWN_NUMBER_FORMAT + parsedExpression[0]);
+                                isError = true;
+                                break;
+                            } catch (StringIndexOutOfBoundsException ex) {
+                                System.out.println(ex + "in " + parsedExpression[0]);
+                                isError = true;
+                                break;
+                            }
                         } else tokens = addSignToken(array[j]);
                     }
                 }
@@ -168,9 +171,11 @@ public class Reader {
             for (int i = 0; i < tokens.size(); ++i) {
                 if (tokens.get(i).getPriority() == maxPriority) {
                     switch(maxPriority) {
-                        case 2: PlusMinusOperation(i); break;
-                        case 3: MultDivisionOperation(i); break;
-                        case 4: UnaryMinus(i); break;
+                        case 2: PlusMinusOperation(i, tokens.get(i-1).getValue(),
+                                tokens.remove(i+1).getValue(), tokens.remove(i).getValue()); break;
+                        case 3: MultDivisionOperation(i, tokens.get(i-1).getValue(),
+                                tokens.remove(i+1).getValue(), tokens.remove(i).getValue()); break;
+                        case 4: UnaryMinus(i, tokens.remove(i+1).getValue()); break;
                     }
                     --i;
                 }
@@ -182,10 +187,7 @@ public class Reader {
         return tokens.get(0).getValue();
     }
     
-    static private void PlusMinusOperation(int index) {
-        double first = tokens.get(index-1).getValue();
-        double second = tokens.remove(index+1).getValue();
-        double sign = tokens.remove(index).getValue();
+    static private void PlusMinusOperation(int index, double first, double second, double sign) {
         switch((int)sign) {
             case 1:
                 tokens.set(index-1, new Token(first + second, 1));
@@ -196,25 +198,21 @@ public class Reader {
         }
     }
     
-    static private void MultDivisionOperation(int index) {
-        double first = tokens.get(index-1).getValue();
-        double second = tokens.remove(index+1).getValue();
-        double sign = tokens.remove(index).getValue();
+    static private void MultDivisionOperation(int index, double first, double second, double sign) {
         switch((int)sign) {
             case 3:
                 tokens.set(index-1, new Token(first * second, 1));
                 break;
             case 4:
                 if (second == 0) {
-                    throw new NumberFormatException("Division By Zero");
+                    throw new NumberFormatException(ERROR_DIVISION_BY_ZERO);
                 }
                 tokens.set(index-1, new Token(first / second, 1));
                 break;
         }
     }
     
-    static private void UnaryMinus(int index) {
-        double first = tokens.remove(index+1).getValue();
+    static private void UnaryMinus(int index, double first) {
         tokens.set(index, new Token(first*-1, 1));
     }
 }

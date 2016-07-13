@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NumberFactory {
-    static ArrayList<ArrayList<VocabularyToken>> vocabularyList = null;
+    private static ArrayList<ArrayList<VocabularyToken>> vocabularyList = null;
     private static final String VOCABULARY_PATH = "C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\vocabulary.txt";
     
     public NumberFactory() throws FileNotFoundException {
