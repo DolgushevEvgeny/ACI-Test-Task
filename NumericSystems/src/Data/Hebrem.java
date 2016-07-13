@@ -1,6 +1,7 @@
 package Data;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Hebrem {
     private static ArrayList<String> tokens = null;
@@ -39,25 +40,31 @@ public class Hebrem {
         }
         try {
             convert();
+            tokens.clear();
         } catch (NumberFormatException ex) {
             throw new NumberFormatException(ex.toString());
         }
-        try {
-            parse();
-        } catch (NumberFormatException ex) {
-            throw new NumberFormatException(ex.toString());
+        if (!parse()) {
+            numbers.clear();
+            throw new NumberFormatException("Wrong number ");
         }
         
-        tokens.clear();
-        return 0;
+        numbers.clear();
+        return total;
     }
     
     static private boolean parse() {
-        for (int i = numbers.size() - 1; i > 0; --i) {
-            if (numbers.get(i) == 0) {
-                
+        if (numbers.size() > 1) {
+            for (int i = numbers.size() - 1; i > 1; --i) {
+                if (numbers.get(i) < numbers.get(i-1)) {
+                    return false;
+                }
+                if (Objects.equals(numbers.get(i), numbers.get(i-1)) && numbers.get(i) != 400000) {
+                    return false;
+                }
             }
         }
+        
         return true;
     }
     
@@ -72,6 +79,7 @@ public class Hebrem {
                 isQuote = false;
                 numbers.add(temp);
                 index = 0;
+                total += temp;
             } catch (NumberFormatException ex) {
                 throw new NumberFormatException(ex.toString());
             }
@@ -198,7 +206,6 @@ public class Hebrem {
                     case LETTER_QUOTE: checkLetterQuote(inputArray); break;
                     default:
                         addToken(inputArray[index]);
-                        //tokens.add(String.valueOf(inputArray[index]));
                         break;
                 }
             } catch (NumberFormatException ex) {

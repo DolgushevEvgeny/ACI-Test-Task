@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 public class NumberFactory {
     static ArrayList<ArrayList<VocabularyToken>> vocabularyList = null;
+    private static final String VOCABULARY_PATH = "C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\vocabulary.txt";
     
     public NumberFactory() throws FileNotFoundException {
         NumberFactory.vocabularyList = new ArrayList<>();
@@ -20,7 +21,7 @@ public class NumberFactory {
     }
     
     private void loadVocabulary() throws FileNotFoundException {
-        FileReader fr = new FileReader("C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\vocabulary.txt");
+        FileReader fr = new FileReader(VOCABULARY_PATH);
         BufferedReader textReader = new BufferedReader(fr);
         
         String alphabet;
@@ -30,7 +31,6 @@ public class NumberFactory {
                 ArrayList<VocabularyToken> vocabulary = new ArrayList<>();
                 
                 for (int i = 0; i < parse.length; ++i) {
-                    //String[] element = parse[i].split(":");
                     VocabularyToken token = new VocabularyToken(parse[i]);
                     vocabulary.add(token);
                 }
@@ -66,7 +66,7 @@ public class NumberFactory {
                         try {
                             return Hebrem.convert(number);
                         } catch (NumberFormatException ex) {
-                            throw new NumberFormatException(ex.toString());
+                            throw new NumberFormatException(ex.toString() + number);
                         }
                 }
             }
