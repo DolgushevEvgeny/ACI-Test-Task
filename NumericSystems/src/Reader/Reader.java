@@ -17,13 +17,122 @@ public class Reader {
     private static final String VOCABULARY_FILE_ERROR = "Can't load vocabulary file";
     private static final String TEST_FILE_ERROR = "Can't load test file";
     
+    private static char[] string = null;
+    private static String currentToken;
+    private static int index = 0;
+    
     enum PrevToken {
         Token,
         Sign,
+        UnaryMinus,
         None
     }
     
     public Reader() {}
+    
+//    public void read() throws FileNotFoundException, IOException {
+//        try {
+//            NumberFactory factory = new NumberFactory();
+//        } catch (FileNotFoundException ex) {
+//            System.out.println(VOCABULARY_FILE_ERROR);
+//            return;
+//        }
+//        
+//        FileReader fr;
+//        try {
+//            fr = new FileReader(TESTFILE_PATH);
+//        } catch (FileNotFoundException ex) {
+//            System.out.println(TEST_FILE_ERROR);
+//            return;
+//        }
+//        
+//        BufferedReader textReader = new BufferedReader(fr);
+//        
+//        String value;
+//        boolean isError;
+//        while ((value = textReader.readLine()) != null) {
+//            isError = false;
+//            String[] parsedExpression = value.split("=");
+//            double answer;
+//            try {
+//                answer = getAnswer(parsedExpression[1]);
+//            } catch (NumberFormatException ex) {
+//                System.out.println(ex + " Can't parse answer " + parsedExpression[1] + " in " + value);
+//                continue;
+//            }           
+//            
+//            char[] array = parsedExpression[0].toCharArray();
+//            String current = "";
+//            prevToken = PrevToken.None;
+//            
+//            tokens = new ArrayList<>();
+//            
+//            for (int j = 0; j < array.length; ++j) {
+//                if (array[j] != ' ') {
+//                    if (array[j] != '+' && array[j] != '*' && array[j] != '/') {
+//                        if (array[j] != '-') {
+//                            current += array[j];
+//                            prevToken = PrevToken.Token;
+//                        } else {
+//                            if (array[j] == '-' && (prevToken == PrevToken.None || prevToken == PrevToken.Sign)) {
+//                                tokens = addSignToken(array[j]);
+//                                prevToken = PrevToken.Token;
+//                            } else {
+//                                try {
+//                                    tokens.add(new Token(NumberFactory.parse(current), 1));
+//                                    current = "";
+//                                    tokens = addSignToken(array[j]);
+//                                    prevToken = PrevToken.Sign;
+//                                } catch (NumberFormatException ex) {
+//                                    System.out.println(ex + current + ERROR_UNKNOWN_NUMBER_FORMAT + parsedExpression[0]);
+//                                    isError = true;
+//                                    break;
+//                                } catch (StringIndexOutOfBoundsException ex) {
+//                                    System.out.println(ex + "in " + parsedExpression[0]);
+//                                    isError = true;
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    } else {
+//                        if (!current.equals("")) {
+//                            try {
+//                                tokens.add(new Token(NumberFactory.parse(current), 1));
+//                                current = "";
+//                                tokens = addSignToken(array[j]);
+//                                prevToken = PrevToken.Sign;
+//                            } catch (NumberFormatException ex) {
+//                                System.out.println(ex + current + ERROR_UNKNOWN_NUMBER_FORMAT + parsedExpression[0]);
+//                                isError = true;
+//                                break;
+//                            } catch (StringIndexOutOfBoundsException ex) {
+//                                System.out.println(ex + "in " + parsedExpression[0]);
+//                                isError = true;
+//                                break;
+//                            }
+//                        } else tokens = addSignToken(array[j]);
+//                    }
+//                }
+//            }
+//            
+//            if (!isError) {
+//                try {
+//                    tokens.add(new Token(NumberFactory.parse(current), 1));
+//                    try {
+//                        double equationResult = calc();
+//                        System.out.println(value + " - " + (answer == equationResult) + " " + equationResult);
+//                    } catch (NumberFormatException ex) {
+//                        System.out.println(ex.toString());
+//                    }
+//                } catch (NumberFormatException ex) {
+//                    System.out.println(ex.toString());
+//                }
+//            }
+//            tokens.clear();
+//        }
+//        
+//        textReader.close();
+//    }
     
     public void read() throws FileNotFoundException, IOException {
         try {
@@ -56,77 +165,149 @@ public class Reader {
                 continue;
             }           
             
-            char[] array = parsedExpression[0].toCharArray();
-            String current = "";
+            string = parsedExpression[0].toCharArray();
             prevToken = PrevToken.None;
             
             tokens = new ArrayList<>();
-            
-            for (int j = 0; j < array.length; ++j) {
-                if (array[j] != ' ') {
-                    if (array[j] != '+' && array[j] != '*' && array[j] != '/') {
-                        if (array[j] != '-') {
-                            current += array[j];
-                            prevToken = PrevToken.Token;
-                        } else {
-                            if (array[j] == '-' && (prevToken == PrevToken.None || prevToken == PrevToken.Sign)) {
-                                tokens = addSignToken(array[j]);
-                                prevToken = PrevToken.Token;
-                            } else {
-                                try {
-                                    tokens.add(new Token(NumberFactory.parse(current), 1));
-                                    current = "";
-                                    tokens = addSignToken(array[j]);
-                                    prevToken = PrevToken.Sign;
-                                } catch (NumberFormatException ex) {
-                                    System.out.println(ex + current + ERROR_UNKNOWN_NUMBER_FORMAT + parsedExpression[0]);
-                                    isError = true;
-                                    break;
-                                } catch (StringIndexOutOfBoundsException ex) {
-                                    System.out.println(ex + "in " + parsedExpression[0]);
-                                    isError = true;
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        if (!current.equals("")) {
-                            try {
-                                tokens.add(new Token(NumberFactory.parse(current), 1));
-                                current = "";
-                                tokens = addSignToken(array[j]);
-                                prevToken = PrevToken.Sign;
-                            } catch (NumberFormatException ex) {
-                                System.out.println(ex + current + ERROR_UNKNOWN_NUMBER_FORMAT + parsedExpression[0]);
-                                isError = true;
-                                break;
-                            } catch (StringIndexOutOfBoundsException ex) {
-                                System.out.println(ex + "in " + parsedExpression[0]);
-                                isError = true;
-                                break;
-                            }
-                        } else tokens = addSignToken(array[j]);
-                    }
-                }
-            }
-            
-            if (!isError) {
+            try {
+                getToken();
                 try {
-                    tokens.add(new Token(NumberFactory.parse(current), 1));
-                    try {
-                        double equationResult = calc();
-                        System.out.println(value + " - " + (answer == equationResult) + " " + equationResult);
-                    } catch (NumberFormatException ex) {
-                        System.out.println(ex.toString());
-                    }
+                    double equationResult = calc();
+                    System.out.println(value + " - " + (answer == equationResult) + " " + equationResult);
                 } catch (NumberFormatException ex) {
                     System.out.println(ex.toString());
                 }
+            } catch (NumberFormatException | StringIndexOutOfBoundsException ex) {
+                System.out.println(ex + parsedExpression[0]);
             }
+            
             tokens.clear();
         }
         
         textReader.close();
+    }
+    
+    static private void getToken() {
+        currentToken = "";
+        for (int i = index; index < string.length - 1; ++index) {
+            if (string[index] != ' ') {
+                currentToken += String.valueOf(string[index]);
+            } else {
+                currentToken = currentToken.trim();
+                if (!currentToken.isEmpty()) {
+                    try {
+                        isUnaryMinusSign();
+                    } catch (NumberFormatException ex) {
+                        throw new NumberFormatException(ex.toString());
+                    } catch (StringIndexOutOfBoundsException ex) {
+                        throw new StringIndexOutOfBoundsException(ex.toString());
+                    }
+                }
+            }
+        }
+        
+        currentToken = currentToken.trim();
+        if (!currentToken.isEmpty()) {
+            try {
+                isUnaryMinusSign();
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.toString());
+            } catch (StringIndexOutOfBoundsException ex) {
+                throw new StringIndexOutOfBoundsException(ex.toString());
+            }
+        }
+    }
+    
+    static private void isUnaryMinusSign() {
+        if (currentToken.equals("-") && (prevToken == PrevToken.None || prevToken == PrevToken.Sign)) {
+            tokens = addSignToken('-');
+            prevToken = PrevToken.UnaryMinus;
+            getToken();
+        } else {
+            try {
+                isDivisionSign(); 
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.toString());
+            } catch (StringIndexOutOfBoundsException ex) {
+                throw new StringIndexOutOfBoundsException(ex.toString());
+            }
+        }
+    }
+    
+    static private void isDivisionSign() {
+        if (currentToken.equals("/") && prevToken == PrevToken.Token) {
+            tokens = addSignToken('/');
+            prevToken = PrevToken.Sign;
+            getToken();
+        } else {
+            try {
+                isMultipleSign();
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.toString());
+            } catch (StringIndexOutOfBoundsException ex) {
+                throw new StringIndexOutOfBoundsException(ex.toString());
+            }
+        }
+    }
+    
+    static private void isMultipleSign() {
+        if (currentToken.equals("*") && prevToken == PrevToken.Token) {
+            tokens = addSignToken('*');
+            prevToken = PrevToken.Sign;
+            getToken();
+        } else {
+            try {
+                isSubtractingSign();
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.toString());
+            } catch (StringIndexOutOfBoundsException ex) {
+                throw new StringIndexOutOfBoundsException(ex.toString());
+            }
+        }
+    }
+    
+    static private void isSubtractingSign() {
+        if (currentToken.equals("-") && prevToken == PrevToken.Token) {
+            tokens = addSignToken('-');
+            prevToken = PrevToken.Sign;
+            getToken();
+        } else {
+            try {
+                isAdditingSign();
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.toString());
+            } catch (StringIndexOutOfBoundsException ex) {
+                throw new StringIndexOutOfBoundsException(ex.toString());
+            }
+        }
+    }
+    
+    static private void isAdditingSign() {
+        if (currentToken.equals("+") && prevToken == PrevToken.Token) {
+            tokens = addSignToken('+');
+            prevToken = PrevToken.Sign;
+            getToken();
+        } else {
+            try {
+                isNumber();
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException(ex.toString());
+            } catch (StringIndexOutOfBoundsException ex) {
+                throw new StringIndexOutOfBoundsException(ex.toString());
+            }
+        }
+    }
+    
+    static private void isNumber() {
+        try {
+            tokens.add(new Token(NumberFactory.parse(currentToken), 1));
+            prevToken = PrevToken.Token;
+            getToken();
+        } catch (NumberFormatException ex) {
+            throw new NumberFormatException(ex.toString() + currentToken + ERROR_UNKNOWN_NUMBER_FORMAT);
+        } catch (StringIndexOutOfBoundsException ex) {
+            throw new StringIndexOutOfBoundsException(ex.toString() + "in ");
+        }
     }
     
     static ArrayList<Token> addSignToken(char sign) {
