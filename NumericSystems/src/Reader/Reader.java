@@ -14,6 +14,8 @@ public class Reader {
     private static final String TESTFILE_PATH = "C:\\Users\\EugeneDolgushev\\Documents\\GitHub\\ACI-Test-Task\\test.txt";
     private static final String ERROR_DIVISION_BY_ZERO = "Division By Zero";
     private static final String ERROR_UNKNOWN_NUMBER_FORMAT = " Unknown number format in ";
+    private static final String VOCABULARY_FILE_ERROR = "Can't load vocabulary file";
+    private static final String TEST_FILE_ERROR = "Can't load test file";
     
     enum PrevToken {
         Token,
@@ -27,7 +29,7 @@ public class Reader {
         try {
             NumberFactory factory = new NumberFactory();
         } catch (FileNotFoundException ex) {
-            System.out.println("Can't load vocabulary file.");
+            System.out.println(VOCABULARY_FILE_ERROR);
             return;
         }
         
@@ -35,7 +37,7 @@ public class Reader {
         try {
             fr = new FileReader(TESTFILE_PATH);
         } catch (FileNotFoundException ex) {
-            System.out.println("Can't load test file.");
+            System.out.println(TEST_FILE_ERROR);
             return;
         }
         
@@ -52,7 +54,7 @@ public class Reader {
             } catch (NumberFormatException ex) {
                 System.out.println(ex + " Can't parse answer " + parsedExpression[1] + " in " + value);
                 continue;
-            }
+            }           
             
             char[] array = parsedExpression[0].toCharArray();
             String current = "";
