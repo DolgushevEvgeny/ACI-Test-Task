@@ -22,6 +22,7 @@ public class Reader {
     private static String currentToken;
     private static int index = 0;
     private static boolean isDivider;
+    private static int countToError;
     private static final String[] symbols = {"+", "-", "*", "/"};
     private static final ArrayList<String> dividers = new ArrayList<>(Arrays.asList(symbols));
     
@@ -176,6 +177,7 @@ public class Reader {
             try {
                 isDivider = true;
                 index = 0;
+                countToError = 0;
                 getToken();
                 try {
                     double equationResult = calc();
@@ -202,6 +204,10 @@ public class Reader {
             } else {
                 if (isDivider) {
                     currentToken += String.valueOf(string[index]);
+                    ++countToError;
+                }
+                if (countToError > 2) {
+                    throw new NumberFormatException("To many operators ");
                 }
                 isDivider = true;
                 
@@ -314,6 +320,7 @@ public class Reader {
         try {
             tokens.add(new Token(NumberFactory.parse(currentToken), 1));
             prevToken = PrevToken.Token;
+            countToError = 0;
             getToken();
         } catch (NumberFormatException ex) {
             throw new NumberFormatException(ex.toString() + currentToken + ERROR_UNKNOWN_NUMBER_FORMAT);
