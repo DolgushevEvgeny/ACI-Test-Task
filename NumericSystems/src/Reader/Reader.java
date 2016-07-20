@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Reader {
     private static int maxPriority = 1;
@@ -20,6 +21,9 @@ public class Reader {
     private static char[] string = null;
     private static String currentToken;
     private static int index = 0;
+    private static boolean isDivider;
+    private static final String[] symbols = {"+", "-", "*", "/"};
+    private static final ArrayList<String> dividers = new ArrayList<>(Arrays.asList(symbols));
     
     enum PrevToken {
         Token,
@@ -170,6 +174,8 @@ public class Reader {
             
             tokens = new ArrayList<>();
             try {
+                isDivider = true;
+                index = 0;
                 getToken();
                 try {
                     double equationResult = calc();
@@ -189,10 +195,16 @@ public class Reader {
     
     static private void getToken() {
         currentToken = "";
-        for (int i = index; index < string.length - 1; ++index) {
-            if (string[index] != ' ') {
+        for (int i = index; index < string.length; ++index) {
+            if (!dividers.contains(String.valueOf(string[index]))) {
                 currentToken += String.valueOf(string[index]);
+                isDivider = false;
             } else {
+                if (isDivider) {
+                    currentToken += String.valueOf(string[index]);
+                }
+                isDivider = true;
+                
                 currentToken = currentToken.trim();
                 if (!currentToken.isEmpty()) {
                     try {
@@ -334,7 +346,7 @@ public class Reader {
                 tokens.add(new Token(4, 3));
                 break;
         }
-        
+        ++index;
         return tokens;
     }
     
